@@ -60,10 +60,6 @@ h2 {
   transform-style: preserve-3d;
 }
 
-.sub_container .card .rot180 {
-  /***/
-  transform: rotateY(180deg);
-}
 
 .sub_container .card .card_front,
 .sub_container .card .card_back {
@@ -89,11 +85,15 @@ h2 {
 }
 
 .sub_container .card .letter_same .card_back {
-  background-color: rgb(196, 150, 0);
+  background-color: rgb(202, 126, 12);
 }
 
 .sub_container .card .not_same .card_back {
   background-color: rgba(203, 0, 0, 0.926);
+}
+
+.sub_container .card .give_up .card_back {
+  background-color: rgb(255, 161, 47);
 }
 
 .btn_container {
