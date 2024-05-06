@@ -8,10 +8,8 @@ const main_container = document.querySelector(".main_container"),
 let currentRow = 0,
   currentColumn = 0,
   column,
-  listenerEnable = false,
-  game_state_start = false,
-  word_to_guess,
-  arr_letter = [];
+  listenerEnable = false;
+(game_state_start = false), (word_to_guess = ""), (arr_letter = []);
 
 function fetchAPI() {
   main_container.innerHTML = `<p>loading...<p>`;
@@ -30,7 +28,6 @@ function fetchAPI() {
       word_to_guess = data[0];
       column = data[0].length;
       renderUI(row, column);
-      listenerEnable = true;
     });
 }
 
@@ -45,7 +42,7 @@ function renderUI(r, c) {
       card.innerHTML = `
       <div class="card_inner">
         <div class="card_front"></div>
-        <div class="card_back">BYE</div>
+        <div class="card_back"></div>
       </div>
       `;
       sub_container.append(card);
@@ -79,15 +76,16 @@ function handleKeypress(e) {
 }
 
 function checkPos(row) {
-  milliseconds = column * transitionTime;
-
+  let milliseconds = column * transitionTime;
   let temp_arr = row.querySelectorAll(".card_inner");
+  let same_letter = 0;
   temp_arr.forEach((card, i) => {
     card.style.transitionDelay = transitionTime * i + "ms";
     card.style.transform = "rotateY(540deg)";
     setTimeout(() => {
       if (arr_letter[i] == word_to_guess[i]) {
         card.classList.add("pos_same");
+        same_letter++;
       } else if (word_to_guess.includes(arr_letter[i])) {
         card.classList.add("letter_same");
       } else {
@@ -99,7 +97,20 @@ function checkPos(row) {
   setTimeout(() => {
     listenerEnable = true;
     arr_letter = [];
-  }, milliseconds);
+
+    if (same_letter == column) {
+      console.log("win");
+      game_state_start = false;
+      listenerEnable = false;
+      temp_arr.forEach((card) => {
+        card.style.transform = `rotateY(1260deg) scale(0.85)`;
+      });
+
+      setTimeout(() => {
+        switchBtnState();
+      }, milliseconds + transitionTime * 2);
+    }
+  }, milliseconds + transitionTime);
 }
 
 window.addEventListener("keypress", handleKeypress);
@@ -115,17 +126,35 @@ function switchBtnState() {
 }
 
 start_btn.addEventListener("click", () => {
-  fetchAPI();
-  game_state_start = true;
-  switchBtnState();
+  if (game_state_start == false) {
+    fetchAPI();
+    listenerEnable = true;
+    game_state_start = true;
+    switchBtnState();
+  }
 });
 
 giveup_btn.addEventListener("click", () => {
   if (game_state_start == true) {
     game_state_start = false;
+    listenerEnable = false;
     switchBtnState();
-    show_word();
+    giveup();
   }
 });
 
-function show_word() {}
+function giveup() {
+  let cards = [...main_container.querySelectorAll(".sub_container")][
+    currentRow
+  ].querySelectorAll(".card_inner");
+
+  cards.forEach((card, i) => {
+    card.style.transitionDelay = transitionTime * i + "ms";
+    card.style.transform = "rotateY(540deg)";
+    setTimeout(() => {
+      card.classList.add("give_up");
+      card.querySelector(".card_back").innerText =
+        word_to_guess[i].toUpperCase();
+    }, transitionTime * i + transitionTime);
+  });
+}
